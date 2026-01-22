@@ -4,4 +4,5 @@ email  johannes.rebhan@agenturkoch.ch
 date   2026-01-22
 name   CKEditor 5 Integration to generate Markdown
 desc   Replaces DokuWiki editor with CKEditor 5 Markdown editor.
-url    https://www.agenturkoch.ch
+url    https://github.com/W4ldgeist/doku-wiki-ckeditor5markdown
+requires markdowku
