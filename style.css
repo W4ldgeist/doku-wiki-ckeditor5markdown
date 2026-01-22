@@ -1,0 +1,8 @@
+#cked-container {
+    min-height: 400px;
+}
+
+/** Hide DokuWiki edit toolbar */
+#tool__bar {
+    display: none !important;
+}
