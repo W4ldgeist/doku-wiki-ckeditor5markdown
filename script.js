@@ -9,17 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
     textarea.style.display = 'none';
     textarea.parentNode.insertBefore(container, textarea);
 
-    function protectDokuMacros(md) {
-        // Wrap {{...}} in inline code unless it already is in backticks.
-        // This is intentionally conservative: it won't try to parse nested macros.
-        return md.replace(/(^|[^`])(\{\{[^}\n]+\}\})/g, (m, prefix, macro) => {
-            return `${prefix}\`${macro}\``;
-        });
+    function protectDokuSyntax(text) {
+        // Protect {{...}} and [[...]] by wrapping them in inline code.
+        // Conservative: does not match across newlines.
+        return text
+            // protect {{...}}
+            .replace(/(^|[^`])(\{\{[^}\n]+\}\})/g, (m, prefix, token) => `${prefix}\`${token}\``)
+            // protect [[...]]
+            .replace(/(^|[^`])(\[\[[^\]\n]+\]\])/g, (m, prefix, token) => `${prefix}\`${token}\``);
     }
 
-    function unprotectDokuMacros(md) {
-        // Turn `{{...}}` back into {{...}}
-        return md.replace(/`(\{\{[^}\n]+\}\})`/g, '$1');
+    function unprotectDokuSyntax(text) {
+        // Unwrap `{{...}}` and `[[...]]` from inline code.
+        return text
+        .replace(/`(\{\{[^}\n]+\}\})`/g, '$1')
+        .replace(/`(\[\[[^\]\n]+\]\])`/g, '$1');
     }
 
     const script = document.createElement('script');
@@ -27,16 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
     script.onload = () => {
         ClassicEditor.default.create(container).then(editor => {
             window.editor = editor;
-            editor.setData(protectDokuMacros(textarea.value));
+            editor.setData(protectDokuSyntax(textarea.value));
 
             editor.model.document.on('change:data', () => {
-                textarea.value = unprotectDokuMacros(editor.getData());
+                textarea.value = unprotectDokuSyntax(editor.getData());
             });
 
             const form = textarea.closest('form');
             if (form) {
                 form.addEventListener('submit', () => {
-                    textarea.value = unprotectDokuMacros(editor.getData());
+                    textarea.value = unprotectDokuSyntax(editor.getData());
                 });
             }
         }).catch(console.error);
